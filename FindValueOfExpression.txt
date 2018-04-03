@@ -1,0 +1,73 @@
+.data
+	msg1: 	.asciiz "Enter the value of x: "
+	msg2: 	.asciiz "Enter the value of y: "
+	msg3: 	.asciiz "Enter the value of z: "
+	msg4:   .asciiz "=> ((5x + 3y + z)/2)*3 =  "
+	
+	a: 	.double 5.0
+	b: 	.double 3.0
+	c: 	.double 2.0
+	d: 	.double 3.0
+
+.text
+	#Get the value of x
+	li $v0, 4
+	la $a0, msg1
+	syscall
+	li $v0, 7
+	syscall
+	
+	# Copy value of x to $f1
+	mov.d $f2, $f0		# f2 = f0
+	
+	# Calculate the value of 5x then copy to $f1
+	ldc1 $f4, a		# load word into coprocessor1
+	mul.d $f2, $f2, $f4		# f2 = f2*f4 = 5*x
+	
+	#Get the value of y
+	li $v0, 4
+	la $a0, msg2
+	syscall
+	li $v0, 7		
+	syscall
+	
+	# Copy value of y to f2
+	mov.d $f4, $f0		# f4 = f0 = y
+	
+	# Calculate the value of 3y then copy to $f2
+	ldc1 $f6, b
+	mul.d $f4, $f4, $f6	# f4 = f4*f6 = 3*y
+	
+	
+	# Calculate the value of 5x + 3y then copy to $f2
+	add.d $f2, $f2, $f4	# f2 = f2 + f4 = 5*x + 3*y
+	
+	
+	#Get the value of z
+	li $v0, 4
+	la $a0, msg3
+	syscall
+	li $v0, 7
+	syscall
+	
+	# Copy the value of z to f4
+	mov.d $f4, $f0		# f4 = f0 = z
+	
+	# Calculate 5x + 3y + z
+	add.d $f2, $f2, $f4	# f2 = f2 + f4 = 5*x + 3*y + z
+	
+	# Calculate ((5x + 3y + z)/2)
+	ldc1 $f6, c
+	div.d $f2, $f2, $f6	# f2 = f2/f6 = (5*x + 3*y + z)/2 
+	
+	# Calculate ((5x + 3y + z)/2)*3
+	ldc1 $f8, d
+	mul.d $f2, $f2, $f8	# f2 = f2*f8 = ((5*x + 3*y + z)/2 )*3
+	
+	#Print
+	li $v0, 4
+	la $a0, msg4		
+	syscall
+	li $v0, 3		
+	add.d  $f12, $f2, $f10
+	syscall
